@@ -1,0 +1,9 @@
+D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\obj\Debug\Sakk.csprojResolveAssemblyReference.cache
+D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\obj\Debug\Sakk.csproj.GenerateResource.Cache
+D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\bin\Debug\Sakk.exe.config
+D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\bin\Debug\Sakk.exe
+D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\bin\Debug\Sakk.pdb
+D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\obj\Debug\Sakk.exe
+D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\obj\Debug\Sakk.pdb
+D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\obj\Debug\Sakk.MainForm.resources
+D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\obj\Debug\Sakk.Resource.resources
