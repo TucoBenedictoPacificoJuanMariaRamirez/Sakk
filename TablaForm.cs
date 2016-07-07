@@ -5,11 +5,14 @@ using System.Windows.Forms;
 
 namespace Sakk
 {
-	public partial class MainForm : Form
+	public partial class TablaForm : Form
 	{
 		Rectangle[] mezok = new Rectangle[64];
 		Jatszma jatszma1 = new Jatszma();
-		public MainForm()
+		Mezo honnan;
+		Mezo hova;
+		bool lepesJeloles = false;
+		public TablaForm()
 		{
 			InitializeComponent();
 			
@@ -20,7 +23,6 @@ namespace Sakk
 					mezok[i * 8 + j] = new Rectangle(ClientSize.Width / 8 * j, ClientSize.Height / 8 * i, ClientSize.Width / 8, ClientSize.Height / 8);
 				}
 			}
-			
 		}
 		
 		protected override void OnPaint(PaintEventArgs e)
@@ -63,6 +65,41 @@ namespace Sakk
 				}
 			}
 			g.Dispose();
+		}
+		void TablaFormClicked(object sender, EventArgs e)
+		{
+			Point eger = PointToClient(Cursor.Position);
+			int mezomeret = ClientSize.Width / 8;
+			Mezo tempMezo = Sakk.TABLA[(char)((int)(eger.X / mezomeret) + 97) + (8 - (int)(eger.Y / mezomeret)).ToString()];
+			if(tempMezo.Ures() && lepesJeloles == false)
+			{
+				//MessageBox.Show("Ures mezo!");
+				return;
+			}
+				
+			if(lepesJeloles == false)
+			{
+				honnan = tempMezo;
+				lepesJeloles = true;
+			}
+			else
+			{
+				hova = tempMezo;
+				if(honnan.Babu.Lep(honnan, hova))
+				{
+					//MessageBox.Show("Helyes lepes " + honnan.Babu.Tipus + "-el az " + honnan.Mezonev + " a " + hova.Mezonev + "!");
+					hova.Babu = honnan.Babu;
+					honnan.Babu = null;
+					this.Invalidate();
+				}
+					
+				else
+				{
+					//MessageBox.Show("Helytelen lepes " + honnan.Babu.Tipus + "-el az " + honnan.Mezonev + " a " + hova.Mezonev + "!");
+				}
+				
+				lepesJeloles = false;
+			}
 		}
 	}
 }

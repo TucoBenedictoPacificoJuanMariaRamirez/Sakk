@@ -8,7 +8,7 @@
  */
 namespace Sakk
 {
-	partial class MainForm
+	partial class TablaForm
 	{
 		/// <summary>
 		/// Designer variable used to keep track of non-visual components.
@@ -38,18 +38,19 @@ namespace Sakk
 		{
 			this.SuspendLayout();
 			// 
-			// MainForm
+			// TablaForm
 			// 
 			this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
 			this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
 			this.BackColor = System.Drawing.Color.White;
 			this.ClientSize = new System.Drawing.Size(504, 504);
-			this.MaximumSize = new System.Drawing.Size(this.Size.Width, this.Size.Height);
 			this.MaximizeBox = false;
+			this.MaximumSize = new System.Drawing.Size(520, 542);
 			this.MinimizeBox = false;
-			this.Name = "Sakk";
+			this.Name = "TablaForm";
 			this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
 			this.Text = "Sakk";
+			this.Click += new System.EventHandler(this.TablaFormClicked);
 			this.ResumeLayout(false);
 
 		}
