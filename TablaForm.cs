@@ -73,7 +73,7 @@ namespace Sakk
 			Mezo tempMezo = Sakk.TABLA[(char)((int)(eger.X / mezomeret) + 97) + (8 - (int)(eger.Y / mezomeret)).ToString()];
 			if(tempMezo.Ures() && lepesJeloles == false)
 			{
-				//MessageBox.Show("Ures mezo!");
+				MessageBox.Show("Ures mezo!");
 				return;
 			}
 				
@@ -82,24 +82,36 @@ namespace Sakk
 				honnan = tempMezo;
 				lepesJeloles = true;
 			}
-			else
+			else if(jatszma1.soron.Szin == honnan.Babu.Szin)
 			{
 				hova = tempMezo;
 				if(honnan.Babu.Lep(honnan, hova))
 				{
-					//MessageBox.Show("Helyes lepes " + honnan.Babu.Tipus + "-el az " + honnan.Mezonev + " a " + hova.Mezonev + "!");
+					MessageBox.Show("Helyes lepes " + honnan.Babu.Tipus + "-el az " + honnan.Mezonev + " a " + hova.Mezonev + "!");
 					hova.Babu = honnan.Babu;
+					hova.Babu.Mezo = hova;
 					honnan.Babu = null;
+					bool sakk = jatszma1.SakkbanVan(!hova.Babu.Szin);
+					jatszma1.Lepesek.Add(new Lepes(honnan, hova, sakk, false));
+					if(sakk)
+						MessageBox.Show("Sakk!");
+					jatszma1.soron.Szin = !jatszma1.soron.Szin;
 					this.Invalidate();
 				}
 					
 				else
 				{
-					//MessageBox.Show("Helytelen lepes " + honnan.Babu.Tipus + "-el az " + honnan.Mezonev + " a " + hova.Mezonev + "!");
+					MessageBox.Show("Helytelen lepes " + honnan.Babu.Tipus + "-el az " + honnan.Mezonev + " a " + hova.Mezonev + "!");
 				}
 				
 				lepesJeloles = false;
 			}
+			else
+			{
+				lepesJeloles = false;
+				MessageBox.Show("Nem o van soron!");
+			}
+				
 		}
 	}
 }

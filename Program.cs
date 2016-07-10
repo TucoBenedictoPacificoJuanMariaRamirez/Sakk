@@ -30,9 +30,10 @@ namespace Sakk
 	
 	public class Jatszma : Sakk
 	{
-		private Jatekos feher;
-		private Jatekos fekete;
+		public Jatekos feher;
+		public Jatekos fekete;
 		public Jatekos soron;
+		public List<Lepes> Lepesek {get; set;}
 		
 		public Jatszma()
 		{
@@ -40,34 +41,78 @@ namespace Sakk
 			feher = new Jatekos("Pisti", true);
 			fekete = new Jatekos("Janos", false);
 			soron = feher;
+			Lepesek = new List<Lepes>();
 			
 			// a 8-8 gyalog hozzaadasa a babukhoz
 			for(char i = 'a';i <= 'h';i++)
 			{
-				feher.TablaraRak(new Gyalog(true), TABLA[i + "2"]);
-				fekete.TablaraRak(new Gyalog(false), TABLA[i + "7"]);
+				feher.TablaraRak(new Gyalog(true, TABLA[i + "2"]), TABLA[i + "2"]);
+				fekete.TablaraRak(new Gyalog(false, TABLA[i + "7"]), TABLA[i + "7"]);
 			}
 			//bastyak
-			feher.TablaraRak(new Bastya(true), TABLA["a1"]);
-			feher.TablaraRak(new Bastya(true), TABLA["h1"]);
-			fekete.TablaraRak(new Bastya(false), TABLA["a8"]);
-			fekete.TablaraRak(new Bastya(false), TABLA["h8"]);
+			feher.TablaraRak(new Bastya(true, TABLA["a1"]), TABLA["a1"]);
+			feher.TablaraRak(new Bastya(true, TABLA["h1"]), TABLA["h1"]);
+			fekete.TablaraRak(new Bastya(false, TABLA["a8"]), TABLA["a8"]);
+			fekete.TablaraRak(new Bastya(false, TABLA["h8"]), TABLA["h8"]);
 			//lovak
-			feher.TablaraRak(new Lo(true), TABLA["b1"]);
-			feher.TablaraRak(new Lo(true), TABLA["g1"]);
-			fekete.TablaraRak(new Lo(false), TABLA["b8"]);
-			fekete.TablaraRak(new Lo(false), TABLA["g8"]);
+			feher.TablaraRak(new Lo(true, TABLA["b1"]), TABLA["b1"]);
+			feher.TablaraRak(new Lo(true, TABLA["g1"]), TABLA["g1"]);
+			fekete.TablaraRak(new Lo(false, TABLA["b8"]), TABLA["b8"]);
+			fekete.TablaraRak(new Lo(false, TABLA["g8"]), TABLA["g8"]);
 			//futok
-			feher.TablaraRak(new Futo(true), TABLA["c1"]);
-			feher.TablaraRak(new Futo(true), TABLA["f1"]);
-			fekete.TablaraRak(new Futo(false), TABLA["c8"]);
-			fekete.TablaraRak(new Futo(false), TABLA["f8"]);
+			feher.TablaraRak(new Futo(true, TABLA["c1"]), TABLA["c1"]);
+			feher.TablaraRak(new Futo(true, TABLA["f1"]), TABLA["f1"]);
+			fekete.TablaraRak(new Futo(false, TABLA["c8"]), TABLA["c8"]);
+			fekete.TablaraRak(new Futo(false, TABLA["f8"]), TABLA["f8"]);
 			//vezerek
-			feher.TablaraRak(new Vezer(true), TABLA["d1"]);
-			fekete.TablaraRak(new Vezer(false), TABLA["d8"]);
+			feher.TablaraRak(new Vezer(true, TABLA["d1"]), TABLA["d1"]);
+			fekete.TablaraRak(new Vezer(false, TABLA["d8"]), TABLA["d8"]);
 			//kiralyok
-			feher.TablaraRak(new Kiraly(true), TABLA["e1"]);
-			fekete.TablaraRak(new Kiraly(false), TABLA["e8"]);
+			feher.TablaraRak(new Kiraly(true, TABLA["e1"]), TABLA["e1"]);
+			fekete.TablaraRak(new Kiraly(false, TABLA["e8"]), TABLA["e8"]);
+		}
+		
+		public bool Jatek()
+		{
+			while(!Lepesek[Lepesek.Count - 1].Matt)
+			{
+				
+			}
+			return true;
+		}
+		
+		public bool SakkbanVan(bool szin)
+		{
+			if(szin == true) // feher
+			{
+				/*int i = 0;
+				Babu tempBabu = feher.Babuk[i];
+				while(tempBabu.Tipus != "kiraly")
+				{
+					i++;
+				}*/
+				foreach(Babu babu in fekete.Babuk)
+				{
+					if(babu.Lep(babu.Mezo, feher.Babuk[feher.Babuk.Count - 1].Mezo))
+						return true;
+				}
+				return false;
+			}
+			else // fekete
+			{
+				/*int i = 0;
+				Babu tempBabu = fekete.Babuk[i];
+				while(tempBabu.Tipus != "kiraly")
+				{
+					i++;
+				}*/
+				foreach(Babu babu in feher.Babuk)
+				{
+					if(babu.Lep(babu.Mezo,fekete.Babuk[fekete.Babuk.Count - 1].Mezo))
+						return true;
+				}
+				return false;
+			}
 		}
 	}
 	
@@ -75,7 +120,8 @@ namespace Sakk
 	{
 		public string Nev {get; set;}
 		public bool Szin {get; set;}
-		public List<Babu> Babuk {get; private set;}
+		public List<Babu> Babuk {get; set;}
+		public bool Sakkban {get; set;}
 		
 		public Jatekos(string nev, bool szin)
 		{
@@ -86,22 +132,33 @@ namespace Sakk
 		
 		public bool TablaraRak(Babu babu, Mezo hova)
 		{
-			if(Sakk.TABLA == null)
-				MessageBox.Show("tabla == null");
 			if(Sakk.TABLA[hova.Mezonev].Ures())
 			{
 				Sakk.TABLA[hova.Mezonev].Babu = babu;
 				Babuk.Add(babu);
 				return true;
 			}
-				
-			else
-				return false;
+			return false;
 		}
 		
 		public void Felad()
 		{
 			
+		}
+	}
+	
+	public sealed class Lepes
+	{
+		public Mezo Honnan {get; set;}
+		public Mezo Hova {get; set;}
+		public bool Sakk {get; set;}
+		public bool Matt {get; set;}
+		public Lepes(Mezo honnan, Mezo hova, bool sakk, bool matt)
+		{
+			Honnan = honnan;
+			Hova = hova;
+			Sakk = sakk;
+			Matt = matt;
 		}
 	}
 	
@@ -116,7 +173,7 @@ namespace Sakk
 			{
 				for(char j = 'a';j <= 'h';j++)
 				{
-					this.tabla[i, (int)j - 96 - 1] = new Mezo(j + (i + 1).ToString(), null);
+					this.tabla[i, (int)j - 96 - 1] = new Mezo(j + (i + 1).ToString());
 				}
 			}
 		}
@@ -157,20 +214,20 @@ namespace Sakk
 		public string Mezonev {get; private set;}
 		public Babu Babu {get; set;}
 		
+		public Mezo(string hova)
+		{
+			this.Betu = hova.ToLower()[0];
+			this.Szam = (int)hova[1] - 48;
+			this.Mezonev = hova;
+			this.Babu = null;
+		}
+		
 		public Mezo(string hova, Babu babu)
 		{
 			this.Betu = hova.ToLower()[0];
 			this.Szam = (int)hova[1] - 48;
 			this.Mezonev = hova;
-			if(babu == null)
-			{
-				this.Babu = null;
-			}
-			else
-			{
-				this.Babu = babu;
-			}
-			
+			this.Babu = babu;
 		}
 		
 		public bool Ures()
@@ -187,6 +244,7 @@ namespace Sakk
 		internal Image Kep {get; set;}
 		public string Tipus {get; set;}
 		public bool Szin {get; set;}
+		public Mezo Mezo{get; set;}
 		
 		public abstract bool Lep(Mezo honnan, Mezo hova);
 	}
@@ -194,7 +252,7 @@ namespace Sakk
 	#region Babuk
 	public sealed class Gyalog : Babu
 	{
-		public Gyalog(bool szin)
+		public Gyalog(bool szin, Mezo hova)
 		{
 			this.Tipus = "gyalog";
 			if(szin)
@@ -208,11 +266,12 @@ namespace Sakk
 				this.Szin = false;
 				this.Kep = Resource1.gyalog_fekete;
 			}
+			this.Mezo = hova;
 		}
 		
 		public override bool Lep(Mezo honnan, Mezo hova)
 		{
-			//TODO: meg azt nezni kell, hogy nem alakult-e ki sakk a lepessel, valamint az en passant lepest es amikor a gyalog eler a szembenlevo alapvonalra
+			//TODO: az en passant lepest es amikor a gyalog eler a szembenlevo alapvonalra
 			if(!hova.Ures() && hova.Babu.Szin == honnan.Babu.Szin)
 				return false;
 			if(honnan.Babu.Szin == true)
@@ -221,7 +280,7 @@ namespace Sakk
 				if((hova.Ures() && hova.Szam == honnan.Szam + 1 && hova.Betu == honnan.Betu) || (hova.Ures() && hova.Szam == honnan.Szam + 2 && honnan.Szam == 2 && hova.Betu == honnan.Betu && Sakk.TABLA[hova.Betu + (hova.Szam - 1).ToString()].Ures()))
 					return true;
 				// UTES
-				if(!hova.Ures() && hova.Babu.Tipus != "kiraly" && hova.Szam == honnan.Szam + 1 && (hova.Betu == honnan.Betu -1 || hova.Betu == honnan.Betu + 1))
+				if(!hova.Ures() && hova.Szam == honnan.Szam + 1 && (hova.Betu == honnan.Betu -1 || hova.Betu == honnan.Betu + 1))
 					return true;
 				else
 					return false;
@@ -232,7 +291,7 @@ namespace Sakk
 				if((hova.Ures() && hova.Szam == honnan.Szam - 1 && hova.Betu == honnan.Betu) || (hova.Ures() && hova.Szam == honnan.Szam - 2 && honnan.Szam == 7 && hova.Betu == honnan.Betu && Sakk.TABLA[hova.Betu + (hova.Szam + 1).ToString()].Ures()))
 					return true;
 				// UTES
-				if(!hova.Ures() && hova.Babu.Tipus != "kiraly" && hova.Szam == honnan.Szam - 1 && (hova.Betu == honnan.Betu -1 || hova.Betu == honnan.Betu + 1))
+				if(!hova.Ures() && hova.Szam == honnan.Szam - 1 && (hova.Betu == honnan.Betu -1 || hova.Betu == honnan.Betu + 1))
 					return true;
 				else
 					return false;
@@ -243,7 +302,7 @@ namespace Sakk
 	
 	public sealed class Bastya : Babu
 	{
-		public Bastya(bool szin)
+		public Bastya(bool szin, Mezo hova)
 		{
 			this.Tipus = "bastya";
 			if(szin)
@@ -256,6 +315,7 @@ namespace Sakk
 				this.Szin = false;
 				this.Kep = Resource1.bastya_fekete;
 			}
+			this.Mezo = hova;
 		}
 		
 		public override bool Lep(Mezo honnan, Mezo hova)
@@ -274,7 +334,7 @@ namespace Sakk
 					}
 					if(hova.Ures()) // LEPES
 						return true;
-					if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+					if(!hova.Ures()) // UTES
 						return true;
 				}
 				if(hova.Szam < honnan.Szam) // LE
@@ -286,7 +346,7 @@ namespace Sakk
 					}
 					if(hova.Ures()) // LEPES
 						return true;
-					if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+					if(!hova.Ures()) // UTES
 						return true;
 				}
 				
@@ -303,7 +363,7 @@ namespace Sakk
 					}
 					if(hova.Ures()) // LEPES
 						return true;
-					if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+					if(!hova.Ures()) // UTES
 						return true;
 				}
 				if(hova.Betu < honnan.Betu) // JOBBRA
@@ -315,7 +375,7 @@ namespace Sakk
 					}
 					if(hova.Ures()) // LEPES
 						return true;
-					if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+					if(!hova.Ures()) // UTES
 						return true;
 				}
 			}
@@ -325,7 +385,7 @@ namespace Sakk
 	
 	public sealed class Lo : Babu
 	{
-		public Lo(bool szin)
+		public Lo(bool szin, Mezo hova)
 		{
 			this.Tipus = "lo";
 			if(szin)
@@ -338,6 +398,7 @@ namespace Sakk
 				this.Szin = false;
 				this.Kep = Resource1.lo_fekete;
 			}
+			this.Mezo = hova;
 		}
 		
 		public override bool Lep(Mezo honnan, Mezo hova)
@@ -349,7 +410,7 @@ namespace Sakk
 			{
 				if(hova.Ures()) // LEPES
 					return true;
-				if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+				if(!hova.Ures()) // UTES
 					return true;
 			}
 			return false;
@@ -358,7 +419,7 @@ namespace Sakk
 	
 	public sealed class Futo : Babu
 	{
-		public Futo(bool szin)
+		public Futo(bool szin, Mezo hova)
 		{
 			this.Tipus = "futo";
 			if(szin)
@@ -372,7 +433,7 @@ namespace Sakk
 				this.Szin = false;
 				this.Kep = Resource1.futo_fekete;
 			}
-				
+			this.Mezo = hova;				
 		}
 		
 		public override bool Lep(Mezo honnan, Mezo hova)
@@ -386,7 +447,7 @@ namespace Sakk
 				{
 					if(hova.Ures()) // LEPES
 						return true;
-					if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+					if(!hova.Ures()) // UTES
 						return true;
 				}
 				if(hova.Betu > honnan.Betu) // JOBBRA
@@ -400,7 +461,7 @@ namespace Sakk
 						}
 						if(hova.Ures()) // LEPES
 							return true;
-						if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+						if(!hova.Ures()) // UTES
 							return true;
 					}
 					if(hova.Szam < honnan.Szam) // LE
@@ -412,7 +473,7 @@ namespace Sakk
 						}
 						if(hova.Ures()) // LEPES
 							return true;
-						if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+						if(!hova.Ures()) // UTES
 							return true;
 					}
 				}
@@ -427,7 +488,7 @@ namespace Sakk
 						}
 						if(hova.Ures()) // LEPES
 							return true;
-						if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+						if(!hova.Ures()) // UTES
 							return true;
 					}
 					if(hova.Szam < honnan.Szam) // LE
@@ -439,7 +500,7 @@ namespace Sakk
 						}
 						if(hova.Ures()) // LEPES
 							return true;
-						if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+						if(!hova.Ures()) // UTES
 							return true;
 					}
 				}
@@ -450,7 +511,7 @@ namespace Sakk
 	
 	public sealed class Vezer : Babu
 	{
-		public Vezer(bool szin)
+		public Vezer(bool szin, Mezo hova)
 		{
 			this.Tipus = "vezer";
 			if(szin)
@@ -464,6 +525,7 @@ namespace Sakk
 				this.Szin = false;
 				this.Kep = Resource1.vezer_fekete;
 			}
+			this.Mezo = hova;
 		}
 		
 		public override bool Lep(Mezo honnan, Mezo hova)
@@ -478,7 +540,7 @@ namespace Sakk
 				{
 					if(hova.Ures()) // LEPES
 						return true;
-					if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+					if(!hova.Ures()) // UTES
 						return true;
 				}
 				if(hova.Betu > honnan.Betu) // JOBBRA
@@ -492,7 +554,7 @@ namespace Sakk
 						}
 						if(hova.Ures()) // LEPES
 							return true;
-						if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+						if(!hova.Ures()) // UTES
 							return true;
 					}
 					if(hova.Szam < honnan.Szam) // LE
@@ -504,7 +566,7 @@ namespace Sakk
 						}
 						if(hova.Ures()) // LEPES
 							return true;
-						if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+						if(!hova.Ures()) // UTES
 							return true;
 					}
 				}
@@ -519,7 +581,7 @@ namespace Sakk
 						}
 						if(hova.Ures()) // LEPES
 							return true;
-						if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+						if(!hova.Ures()) // UTES
 							return true;
 					}
 					if(hova.Szam < honnan.Szam) // LE
@@ -531,7 +593,7 @@ namespace Sakk
 						}
 						if(hova.Ures()) // LEPES
 							return true;
-						if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+						if(!hova.Ures()) // UTES
 							return true;
 					}
 				}
@@ -549,7 +611,7 @@ namespace Sakk
 					}
 					if(hova.Ures()) // LEPES
 						return true;
-					if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+					if(!hova.Ures()) // UTES
 						return true;
 				}
 				if(hova.Szam < honnan.Szam) // LE
@@ -561,7 +623,7 @@ namespace Sakk
 					}
 					if(hova.Ures()) // LEPES
 						return true;
-					if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+					if(!hova.Ures()) // UTES
 						return true;
 				}
 				
@@ -579,7 +641,7 @@ namespace Sakk
 					}
 					if(hova.Ures()) // LEPES
 						return true;
-					if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+					if(!hova.Ures()) // UTES
 						return true;
 				}
 				if(hova.Betu < honnan.Betu) // JOBBRA
@@ -591,7 +653,7 @@ namespace Sakk
 					}
 					if(hova.Ures()) // LEPES
 						return true;
-					if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+					if(!hova.Ures()) // UTES
 						return true;
 				}
 			}
@@ -601,7 +663,7 @@ namespace Sakk
 	
 	public sealed class Kiraly : Babu
 	{
-		public Kiraly(bool szin)
+		public Kiraly(bool szin, Mezo hova)
 		{
 			this.Tipus = "kiraly";
 			if(szin)
@@ -615,6 +677,7 @@ namespace Sakk
 				this.Szin = false;
 				this.Kep = Resource1.kiraly_fekete;
 			}
+			this.Mezo = hova;
 		}
 		
 		public override bool Lep(Mezo honnan, Mezo hova)
@@ -625,7 +688,7 @@ namespace Sakk
 			{
 				if(hova.Ures()) // LEPES
 					return true;
-				if(!hova.Ures() && hova.Babu.Tipus != "kiraly") // UTES
+				if(!hova.Ures()) // UTES
 					return true;
 			}
 			return false;
