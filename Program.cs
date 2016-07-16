@@ -5,6 +5,8 @@ using System.Drawing;
 
 namespace Sakk
 {
+	public delegate bool SakkbanVanDelegate(bool szin);
+	
 	internal sealed class Program
 	{
 		[STAThread]
@@ -85,30 +87,18 @@ namespace Sakk
 		{
 			if(szin == true) // feher
 			{
-				/*int i = 0;
-				Babu tempBabu = feher.Babuk[i];
-				while(tempBabu.Tipus != "kiraly")
-				{
-					i++;
-				}*/
 				foreach(Babu babu in fekete.Babuk)
 				{
-					if(babu.Lep(babu.Mezo, feher.Babuk[feher.Babuk.Count - 1].Mezo))
+					if(babu.Lephet(babu.Mezo, feher.Babuk[feher.Babuk.Count - 1].Mezo, false, null))
 						return true;
 				}
 				return false;
 			}
 			else // fekete
 			{
-				/*int i = 0;
-				Babu tempBabu = fekete.Babuk[i];
-				while(tempBabu.Tipus != "kiraly")
-				{
-					i++;
-				}*/
 				foreach(Babu babu in feher.Babuk)
 				{
-					if(babu.Lep(babu.Mezo,fekete.Babuk[fekete.Babuk.Count - 1].Mezo))
+					if(babu.Lephet(babu.Mezo,fekete.Babuk[fekete.Babuk.Count - 1].Mezo, false, null))
 						return true;
 				}
 				return false;
@@ -246,7 +236,7 @@ namespace Sakk
 		public bool Szin {get; set;}
 		public Mezo Mezo{get; set;}
 		
-		public abstract bool Lep(Mezo honnan, Mezo hova);
+		public abstract bool Lephet(Mezo honnan, Mezo hova, bool nezzeSakkot, SakkbanVanDelegate sakkdel);
 	}
 	
 	#region Babuk
@@ -269,7 +259,7 @@ namespace Sakk
 			this.Mezo = hova;
 		}
 		
-		public override bool Lep(Mezo honnan, Mezo hova)
+		public override bool Lephet(Mezo honnan, Mezo hova, bool nezzeSakkot, SakkbanVanDelegate sakkdel)
 		{
 			//TODO: az en passant lepest es amikor a gyalog eler a szembenlevo alapvonalra
 			if(!hova.Ures() && hova.Babu.Szin == honnan.Babu.Szin)
@@ -278,10 +268,31 @@ namespace Sakk
 			{
 				// LEPES
 				if((hova.Ures() && hova.Szam == honnan.Szam + 1 && hova.Betu == honnan.Betu) || (hova.Ures() && hova.Szam == honnan.Szam + 2 && honnan.Szam == 2 && hova.Betu == honnan.Betu && Sakk.TABLA[hova.Betu + (hova.Szam - 1).ToString()].Ures()))
-					return true;
+				{
+					if(nezzeSakkot)
+					{
+						if(sakkdel(honnan.Babu.Szin))
+							return false;
+						else
+							return true;
+					}
+					else
+						return true;
+				}
+					
 				// UTES
 				if(!hova.Ures() && hova.Szam == honnan.Szam + 1 && (hova.Betu == honnan.Betu -1 || hova.Betu == honnan.Betu + 1))
-					return true;
+				{
+					if(nezzeSakkot)
+					{
+						if(sakkdel(honnan.Babu.Szin))
+							return false;
+						else
+							return true;
+					}
+					else
+						return true;
+				}
 				else
 					return false;
 			}
@@ -289,10 +300,30 @@ namespace Sakk
 			{
 				// LEPES
 				if((hova.Ures() && hova.Szam == honnan.Szam - 1 && hova.Betu == honnan.Betu) || (hova.Ures() && hova.Szam == honnan.Szam - 2 && honnan.Szam == 7 && hova.Betu == honnan.Betu && Sakk.TABLA[hova.Betu + (hova.Szam + 1).ToString()].Ures()))
-					return true;
+				{
+					if(nezzeSakkot)
+					{
+						if(sakkdel(honnan.Babu.Szin))
+							return false;
+						else
+							return true;
+					}
+					else
+						return true;
+				}
 				// UTES
 				if(!hova.Ures() && hova.Szam == honnan.Szam - 1 && (hova.Betu == honnan.Betu -1 || hova.Betu == honnan.Betu + 1))
-					return true;
+				{
+					if(nezzeSakkot)
+					{
+						if(sakkdel(honnan.Babu.Szin))
+							return false;
+						else
+							return true;
+					}
+					else
+						return true;
+				}
 				else
 					return false;
 			}
@@ -318,7 +349,7 @@ namespace Sakk
 			this.Mezo = hova;
 		}
 		
-		public override bool Lep(Mezo honnan, Mezo hova)
+		public override bool Lephet(Mezo honnan, Mezo hova, bool nezzeSakkot, SakkbanVanDelegate sakkdel)
 		{
 			if(!hova.Ures() && hova.Babu.Szin == honnan.Babu.Szin) // ez kiszuri, hogyha barati babut utnenk le, vagy ugyanabba a pozicioba akarnank lepni
 				return false;
@@ -333,9 +364,29 @@ namespace Sakk
 							return false;
 					}
 					if(hova.Ures()) // LEPES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 					if(!hova.Ures()) // UTES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 				}
 				if(hova.Szam < honnan.Szam) // LE
 				{
@@ -345,28 +396,35 @@ namespace Sakk
 							return false;
 					}
 					if(hova.Ures()) // LEPES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 					if(!hova.Ures()) // UTES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 				}
-				
 			}
 			if(hova.Szam == honnan.Szam) // VIZSZINTES
 			{
-				int d = Math.Abs(hova.Betu - hova.Betu) - 1; // a ket mezo kozotti mezok szama
-				if(hova.Betu > honnan.Betu) // BALRA
-				{
-					for(int i = 1;i <= d;i++)
-					{
-						if(!Sakk.TABLA[(char)(hova.Betu + i) + hova.Szam.ToString()].Ures())
-							return false;
-					}
-					if(hova.Ures()) // LEPES
-						return true;
-					if(!hova.Ures()) // UTES
-						return true;
-				}
-				if(hova.Betu < honnan.Betu) // JOBBRA
+				int d = Math.Abs(hova.Betu - honnan.Betu) - 1; // a ket mezo kozotti mezok szama
+				if(hova.Betu > honnan.Betu) // JOBBRA
 				{
 					for(int i = 1;i <= d;i++)
 					{
@@ -374,9 +432,61 @@ namespace Sakk
 							return false;
 					}
 					if(hova.Ures()) // LEPES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 					if(!hova.Ures()) // UTES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
+				}
+				if(hova.Betu < honnan.Betu) // BALRA
+				{
+					for(int i = 1;i <= d;i++)
+					{
+						if(!Sakk.TABLA[(char)(honnan.Betu - i) + hova.Szam.ToString()].Ures())
+							return false;
+					}
+					if(hova.Ures()) // LEPES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
+					if(!hova.Ures()) // UTES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 				}
 			}
 			return false;
@@ -401,7 +511,7 @@ namespace Sakk
 			this.Mezo = hova;
 		}
 		
-		public override bool Lep(Mezo honnan, Mezo hova)
+		public override bool Lephet(Mezo honnan, Mezo hova, bool nezzeSakkot, SakkbanVanDelegate sakkdel)
 		{
 			if(!hova.Ures() && hova.Babu.Szin == honnan.Babu.Szin) // ez kiszuri, hogyha barati babut utnenk le, vagy ugyanabba a pozicioba akarnank lepni
 				return false;
@@ -409,9 +519,29 @@ namespace Sakk
 			   || ((honnan.Betu - 1 == hova.Betu || honnan.Betu + 1 == hova.Betu) && (honnan.Szam + 2 == hova.Szam || honnan.Szam - 2 == hova.Szam)))
 			{
 				if(hova.Ures()) // LEPES
-					return true;
-				if(!hova.Ures()) // UTES
-					return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
+					if(!hova.Ures()) // UTES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 			}
 			return false;
 		}
@@ -436,7 +566,7 @@ namespace Sakk
 			this.Mezo = hova;				
 		}
 		
-		public override bool Lep(Mezo honnan, Mezo hova)
+		public override bool Lephet(Mezo honnan, Mezo hova, bool nezzeSakkot, SakkbanVanDelegate sakkdel)
 		{
 			if(!hova.Ures() && hova.Babu.Szin == honnan.Babu.Szin) // ez kiszuri, hogyha barati babut utnenk le, vagy ugyanabba a pozicioba akarnank lepni
 				return false;
@@ -446,9 +576,29 @@ namespace Sakk
 				if(d == 0) // SZOMSZEDOS MEZO
 				{
 					if(hova.Ures()) // LEPES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 					if(!hova.Ures()) // UTES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 				}
 				if(hova.Betu > honnan.Betu) // JOBBRA
 				{
@@ -460,9 +610,29 @@ namespace Sakk
 								return false;
 						}
 						if(hova.Ures()) // LEPES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
-						if(!hova.Ures()) // UTES
+					}
+					if(!hova.Ures()) // UTES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
+					}
 					}
 					if(hova.Szam < honnan.Szam) // LE
 					{
@@ -472,9 +642,29 @@ namespace Sakk
 								return false;
 						}
 						if(hova.Ures()) // LEPES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
-						if(!hova.Ures()) // UTES
+					}
+					if(!hova.Ures()) // UTES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
+					}
 					}
 				}
 				if(hova.Betu < honnan.Betu) // BALRA
@@ -487,9 +677,29 @@ namespace Sakk
 								return false;
 						}
 						if(hova.Ures()) // LEPES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
-						if(!hova.Ures()) // UTES
+					}
+					if(!hova.Ures()) // UTES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
+					}
 					}
 					if(hova.Szam < honnan.Szam) // LE
 					{
@@ -499,9 +709,29 @@ namespace Sakk
 								return false;
 						}
 						if(hova.Ures()) // LEPES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
-						if(!hova.Ures()) // UTES
+					}
+					if(!hova.Ures()) // UTES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
+					}
 					}
 				}
 			}
@@ -528,7 +758,7 @@ namespace Sakk
 			this.Mezo = hova;
 		}
 		
-		public override bool Lep(Mezo honnan, Mezo hova)
+		public override bool Lephet(Mezo honnan, Mezo hova, bool nezzeSakkot, SakkbanVanDelegate sakkdel)
 		{
 			if(!hova.Ures() && hova.Babu.Szin == honnan.Babu.Szin) // ez kiszuri, hogyha barati babut utnenk le, vagy ugyanabba a pozicioba akarnank lepni
 				return false;
@@ -539,9 +769,29 @@ namespace Sakk
 				if(d == 0) // SZOMSZEDOS MEZO
 				{
 					if(hova.Ures()) // LEPES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 					if(!hova.Ures()) // UTES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 				}
 				if(hova.Betu > honnan.Betu) // JOBBRA
 				{
@@ -553,9 +803,29 @@ namespace Sakk
 								return false;
 						}
 						if(hova.Ures()) // LEPES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
-						if(!hova.Ures()) // UTES
+					}
+					if(!hova.Ures()) // UTES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
+					}
 					}
 					if(hova.Szam < honnan.Szam) // LE
 					{
@@ -565,9 +835,29 @@ namespace Sakk
 								return false;
 						}
 						if(hova.Ures()) // LEPES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
-						if(!hova.Ures()) // UTES
+					}
+					if(!hova.Ures()) // UTES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
+					}
 					}
 				}
 				if(hova.Betu < honnan.Betu) // BALRA
@@ -580,9 +870,29 @@ namespace Sakk
 								return false;
 						}
 						if(hova.Ures()) // LEPES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
-						if(!hova.Ures()) // UTES
+					}
+					if(!hova.Ures()) // UTES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
+					}
 					}
 					if(hova.Szam < honnan.Szam) // LE
 					{
@@ -592,9 +902,29 @@ namespace Sakk
 								return false;
 						}
 						if(hova.Ures()) // LEPES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
-						if(!hova.Ures()) // UTES
+					}
+					if(!hova.Ures()) // UTES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
 							return true;
+					}
 					}
 				}
 			}
@@ -610,9 +940,29 @@ namespace Sakk
 							return false;
 					}
 					if(hova.Ures()) // LEPES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 					if(!hova.Ures()) // UTES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 				}
 				if(hova.Szam < honnan.Szam) // LE
 				{
@@ -622,29 +972,37 @@ namespace Sakk
 							return false;
 					}
 					if(hova.Ures()) // LEPES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 					if(!hova.Ures()) // UTES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 				}
 				
 			}
 			// VIZSZINTES
-			if(hova.Szam == honnan.Szam)// VIZSZINTES
+			if(hova.Szam == honnan.Szam)
 			{
-				int d = Math.Abs(hova.Betu - hova.Betu) - 1; // a ket mezo kozotti mezok szama
-				if(hova.Betu > honnan.Betu) // BALRA
-				{
-					for(int i = 1;i <= d;i++)
-					{
-						if(!Sakk.TABLA[(char)(hova.Betu + i) + hova.Szam.ToString()].Ures())
-							return false;
-					}
-					if(hova.Ures()) // LEPES
-						return true;
-					if(!hova.Ures()) // UTES
-						return true;
-				}
-				if(hova.Betu < honnan.Betu) // JOBBRA
+				int d = Math.Abs(hova.Betu - honnan.Betu) - 1; // a ket mezo kozotti mezok szama
+				if(hova.Betu > honnan.Betu) // JOBBRA
 				{
 					for(int i = 1;i <= d;i++)
 					{
@@ -652,9 +1010,61 @@ namespace Sakk
 							return false;
 					}
 					if(hova.Ures()) // LEPES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 					if(!hova.Ures()) // UTES
-						return true;
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
+				}
+				if(hova.Betu < honnan.Betu) // BALRA
+				{
+					for(int i = 1;i <= d;i++)
+					{
+						if(!Sakk.TABLA[(char)(honnan.Betu - i) + hova.Szam.ToString()].Ures())
+							return false;
+					}
+					if(hova.Ures()) // LEPES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
+					if(!hova.Ures()) // UTES
+					{
+						if(nezzeSakkot)
+						{
+							if(sakkdel(honnan.Babu.Szin))
+								return false;
+							else
+								return true;
+						}
+						else
+							return true;
+					}
 				}
 			}
 			return false;
@@ -680,15 +1090,33 @@ namespace Sakk
 			this.Mezo = hova;
 		}
 		
-		public override bool Lep(Mezo honnan, Mezo hova)
+		public override bool Lephet(Mezo honnan, Mezo hova, bool nezzeSakkot, SakkbanVanDelegate sakkdel)
 		{
 			if(!hova.Ures() && hova.Babu.Szin == honnan.Babu.Szin) // ez kiszuri, hogyha barati babut utnenk le, vagy ugyanabba a pozicioba akarnank lepni
 				return false;
 			if(Math.Abs(hova.Betu - honnan.Betu) <= 1 && Math.Abs(hova.Szam - honnan.Szam) <= 1)
 			{
-				if(hova.Ures()) // LEPES
-					return true;
-				if(!hova.Ures()) // UTES
+				if(nezzeSakkot)
+				{
+					Babu tempBabu = hova.Babu;
+					hova.Babu = honnan.Babu;
+					hova.Babu.Mezo = hova;
+					if(sakkdel(honnan.Babu.Szin))
+					{
+						honnan.Babu = hova.Babu;
+						hova.Babu = tempBabu;
+						return false;
+					}
+						
+					else
+					{
+						honnan.Babu = hova.Babu;
+						hova.Babu = tempBabu;
+						return true;
+					}
+						
+				}
+				else
 					return true;
 			}
 			return false;
