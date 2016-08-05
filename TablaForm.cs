@@ -8,15 +8,13 @@ namespace Sakk
 	public partial class TablaForm : Form
 	{
 		Rectangle[] mezok = new Rectangle[64];
-		Jatszma jatszma1 = new Jatszma();
-		SakkbanVanDelegate sakkdel;
 		Mezo honnan;
 		Mezo hova;
 		bool lepesJeloles = false;
+		public Tisztek gyalogCsereValasztas;
 		public TablaForm()
 		{
 			InitializeComponent();
-			sakkdel = jatszma1.SakkbanVan;
 			for(int i = 0;i < 8;i++)
 			{
 				for(int j = 0;j < 8;j++)
@@ -29,7 +27,8 @@ namespace Sakk
 		protected override void OnPaint(PaintEventArgs e)
 		{
 			base.OnPaint(e);
-			Graphics g = this.CreateGraphics();
+			//Graphics g = this.CreateGraphics();
+			Graphics g = e.Graphics;
 			Pen pen = new Pen(Color.White);
 			pen.Width = 1;
 			SolidBrush black = new SolidBrush(Color.Brown);
@@ -50,7 +49,6 @@ namespace Sakk
 						if(j % 2 != 0)
 							g.FillRectangle(black, mezok[i * 8 + j]);
 					}
-						
 				}
 			}
 			
@@ -71,8 +69,9 @@ namespace Sakk
 				{
 					for(int j = 1;j <= 8;j++)
 					{
-						if(honnan.Babu.Lephet(honnan, Sakk.TABLA[i + j.ToString()], true, sakkdel))
+						if(honnan.Babu.Lephet(honnan, Sakk.TABLA[i + j.ToString()], true))
 						{
+							//TODO: itt mar a hovaLephet metodust kene hasznalni
 							Pen kijeloles = new Pen(Color.FromArgb(200, Color.Black));
 							kijeloles.Width = 5;
 						   	Mezo tempMezo = Sakk.TABLA[i + j.ToString()];
@@ -98,7 +97,7 @@ namespace Sakk
 				return;
 			}
 			// HA NEM A KATTINTOTT JATEKOS VAN SORON
-			if(honnan == null && tempMezo.Babu.Szin != jatszma1.soron.Szin)
+			if(honnan == null && tempMezo.Babu.Szin != Sakk.jatszma1.soron.Szin)
 			{
 				lepesJeloles = false;
 				this.Invalidate();
@@ -112,33 +111,56 @@ namespace Sakk
 				this.Invalidate();
 			}
 			// HA MI VAGYUNK SORON
-			else if(jatszma1.soron.Szin == honnan.Babu.Szin)
+			else if(Sakk.jatszma1.soron.Szin == honnan.Babu.Szin)
 			{
 				hova = tempMezo;
 				// HELYES LEPES
-				if(honnan.Babu.Lephet(honnan, hova, true, sakkdel))
+				if(honnan.Babu.Lephet(honnan, hova, true))
 				{
-					MessageBox.Show("Helyes lepes " + honnan.Babu.Tipus + "-el az " + honnan.Mezonev + " a " + hova.Mezonev + "!");
+					//MessageBox.Show("Helyes lepes " + honnan.Babu.Tipus + "-el az " + honnan.Mezonev + " a " + hova.Mezonev + "!");
 					if(!hova.Ures())
 					{
 						if(hova.Babu.Szin)
 						{
-							jatszma1.feher.Babuk.Remove(hova.Babu);
+							Sakk.jatszma1.feher.Babuk.Remove(hova.Babu);
 						}
 						else
 						{
-							jatszma1.fekete.Babuk.Remove(hova.Babu);
+							Sakk.jatszma1.fekete.Babuk.Remove(hova.Babu);
 						}
 					}
-					hova.Babu = honnan.Babu;
-					hova.Babu.Mezo = hova;
-					honnan.Babu = null;
+					// LEPES
+					Sakk.jatszma1.Lepes(honnan.Babu, hova);
 					
-					bool sakk = jatszma1.SakkbanVan(!hova.Babu.Szin);
-					jatszma1.Lepesek.Add(new Lepes(honnan, hova, sakk, false));
+					// Gyalog promocio
+					//Lepes utobbiLepes = Sakk.jatszma1.Lepesek[Sakk.jatszma1.Lepesek.Count - 1];
+					GyalogcsereForm gycsere = new GyalogcsereForm(this);
+					if(Sakk.jatszma1.soron.Szin && hova.Szam == 8 && hova.Babu.Tipus == "gyalog")
+					{
+						gycsere.ShowDialog();
+						Sakk.jatszma1.feher.gyalogPromocio(hova, gyalogCsereValasztas);
+						
+					}
+					if(!Sakk.jatszma1.soron.Szin && hova.Szam == 1 && hova.Babu.Tipus == "gyalog")
+					{
+						gycsere.ShowDialog();
+						Sakk.jatszma1.fekete.gyalogPromocio(hova, gyalogCsereValasztas);
+					}
+					
+					bool sakk = Sakk.jatszma1.SakkbanVan(!hova.Babu.Szin);
+					bool matt = Sakk.jatszma1.Matt(!hova.Babu.Szin);
+					Sakk.jatszma1.Lepesek.Add(new Lepes(honnan, hova, sakk, matt));
+					
+					if(matt)
+					{
+						MessageBox.Show("Matt!");
+						return;
+					}
+					
 					if(sakk)
 						MessageBox.Show("Sakk!");
-					jatszma1.soron.Szin = !jatszma1.soron.Szin;
+					
+					Sakk.jatszma1.soron.Szin = !Sakk.jatszma1.soron.Szin;
 					honnan = null;
 					this.Invalidate();
 				}

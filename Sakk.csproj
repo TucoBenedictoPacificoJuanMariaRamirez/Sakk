@@ -50,6 +50,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="GyalogcsereForm.cs" />
+    <Compile Include="GyalogcsereForm.Designer.cs">
+      <DependentUpon>GyalogcsereForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="TablaForm.cs" />
     <Compile Include="TablaForm.Designer.cs">
       <DependentUpon>TablaForm.cs</DependentUpon>
@@ -65,6 +69,9 @@
     <None Include="app.config" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="GyalogcsereForm.resx">
+      <DependentUpon>GyalogcsereForm.Designer.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="TablaForm.resx">
       <DependentUpon>TablaForm.cs</DependentUpon>
     </EmbeddedResource>

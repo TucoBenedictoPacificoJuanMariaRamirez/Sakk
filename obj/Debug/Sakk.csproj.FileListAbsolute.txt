@@ -7,3 +7,4 @@ D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\obj\Debug\Sakk.exe
 D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\obj\Debug\Sakk.pdb
 D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\obj\Debug\Sakk.Resource.resources
 D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\obj\Debug\Sakk.TablaForm.resources
+D:\DEVELOPMENT\C#\Projektek\SAKK\Sakk\obj\Debug\Sakk.GyalogcsereForm.resources
